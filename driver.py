@@ -16,7 +16,7 @@ def resize_window(window_name, width, height):
 
 
 """ Generate a stochastic tree model and save it to a folder specified by the user """
-def generate_stochastic_tree_model(output_folder, filename):
+def generate_stochastic_tree_model(output_folder_path, filename):
     import pygetwindow
     import time
 
@@ -37,11 +37,18 @@ def generate_stochastic_tree_model(output_folder, filename):
     # Wait for File Explorer to open
     while (get_active_window_name() != "Export Mesh"):
         time.sleep(0.5)
+
+    time.sleep(0.3)
+
+    # Check if output folder exists, if not create it
+    import os
+    if not os.path.exists(output_folder_path):
+        os.makedirs(output_folder_path)
     
     # Select the output folder by using Ctrl+L 
     pyautogui.hotkey('ctrl','l')   
     # Paste the output folder path into the File Explorer window
-    pyautogui.typewrite(output_folder)
+    pyautogui.typewrite(output_folder_path)
     pyautogui.press('enter')
     time.sleep(0.1)
 
@@ -66,37 +73,49 @@ def generate_stochastic_tree_model(output_folder, filename):
     while (get_active_window_name() != "SpeedTree Modeler v8.3.0 (Cinema Edition)"):
         import time
         time.sleep(0.5)
+    
+    time.sleep(1.0)
 
 
 """ Open the seed file and run the simulation for the given number of itterations."""
 def main(seed_spm_filepath, output_folder, number_of_itterations):
     # Open the seed file
     import os
+    import time
+
+    print("Starting macro simulation in 10 seconds...")
+    time.sleep(10)
+
     os.startfile(r'{}'.format(seed_spm_filepath))
     
     # Wait for SpeedTree to load
     while (get_active_window_name() != "SpeedTree Modeler v8.3.0 (Cinema Edition)" and get_active_window_name() != "Alert"):
-        import time
         time.sleep(0.5)
+
+    time.sleep(0.3)
 
     # Progress through the Alerts if they exist
     while (get_active_window_name() == "Alert"):
         # Press the enter key to continue
         import pyautogui
         pyautogui.press('enter')
-        import time
         time.sleep(0.5)
 
     # Wait until the SpeedTree Modeler is active
     while (get_active_window_name() != "SpeedTree Modeler v8.3.0 (Cinema Edition)"):
-        import time
         time.sleep(0.5)
+
+    # Wait for SpeedTree Software to load in completely
+    time.sleep(5.0)
 
     # Resize the window to the desired size
     resize_window(window_name="SpeedTree Modeler v8.3.0 (Cinema Edition)", width=cfg.WINDOW_WIDTH, height=cfg.WINDOW_HEIGHT)
     
+    # append the seed_spm_filepath filename to the output_folder
+    output_folder_path = output_folder + "\\" + seed_spm_filepath.split("\\")[-1].split(".")[0]
+
     for i in range(number_of_itterations):
-        generate_stochastic_tree_model(output_folder, "{}".format(i))
+        generate_stochastic_tree_model(output_folder_path, "{}".format(i))
 
     # Run the simulation for the given number of itterations
     pass

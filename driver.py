@@ -29,7 +29,7 @@ def generate_stochastic_tree_model(output_folder_path, filename):
     # Click the "Random" button
     import pyautogui
     pyautogui.click(x= WINDOW_X + 214, y= WINDOW_Y + 98)
-    time.sleep(0.5)
+    time.sleep(1.5)
 
     # Export the model as a mesh by using Ctrl+E
     pyautogui.hotkey('ctrl', 'e', interval=0.1)
@@ -38,33 +38,29 @@ def generate_stochastic_tree_model(output_folder_path, filename):
     while (get_active_window_name() != "Export Mesh"):
         time.sleep(0.5)
 
-    time.sleep(0.3)
+    time.sleep(1.0)
 
     # Check if output folder exists, if not create it
     import os
     if not os.path.exists(output_folder_path):
         os.makedirs(output_folder_path)
     
+    time.sleep(0.5)
+
+    # Paste the tree model filename into the File Explorer window
+    pyautogui.typewrite(filename)
+    time.sleep(0.3)
+
     # Select the output folder by using Ctrl+L 
     pyautogui.hotkey('ctrl','l')   
     # Paste the output folder path into the File Explorer window
     pyautogui.typewrite(output_folder_path)
+    time.sleep(0.3)
     pyautogui.press('enter')
-    time.sleep(0.1)
-
-    # Press Tab key followed by Esc to circumvent a bug in the File Explorer window
-    pyautogui.press('tab')
-    time.sleep(0.3)
-    pyautogui.press('esc')
-    time.sleep(0.3)
-
-    # Select the tree model filename by using Alt+N
-    pyautogui.hotkey('alt','n',interval=0.1)
-    # Paste the tree model filename into the File Explorer window
-    pyautogui.typewrite(filename)
+    time.sleep(1.0)
 
     # Save the mesh by using Alt+S
-    pyautogui.hotkey('alt','s',interval=0.1)
+    pyautogui.hotkey('alt','s',interval=0.3)
 
     # Click OK to export the mesh
     pyautogui.press('enter')
@@ -74,11 +70,11 @@ def generate_stochastic_tree_model(output_folder_path, filename):
         import time
         time.sleep(0.5)
     
-    time.sleep(1.0)
+    time.sleep(7.0)
 
 
 """ Open the seed file and run the simulation for the given number of itterations."""
-def main(seed_spm_filepath, output_folder, number_of_itterations):
+def main(seed_spm_filepath, output_folder, start_iteration, end_iteration):
     # Open the seed file
     import os
     import time
@@ -106,7 +102,7 @@ def main(seed_spm_filepath, output_folder, number_of_itterations):
         time.sleep(0.5)
 
     # Wait for SpeedTree Software to load in completely
-    time.sleep(5.0)
+    time.sleep(30.0)
 
     # Resize the window to the desired size
     resize_window(window_name="SpeedTree Modeler v8.3.0 (Cinema Edition)", width=cfg.WINDOW_WIDTH, height=cfg.WINDOW_HEIGHT)
@@ -114,7 +110,7 @@ def main(seed_spm_filepath, output_folder, number_of_itterations):
     # append the seed_spm_filepath filename to the output_folder
     output_folder_path = output_folder + "\\" + seed_spm_filepath.split("\\")[-1].split(".")[0]
 
-    for i in range(number_of_itterations):
+    for i in range(start_iteration, end_iteration):
         generate_stochastic_tree_model(output_folder_path, "{}".format(i))
 
     # Run the simulation for the given number of itterations
@@ -129,6 +125,15 @@ if __name__ == '__main__':
     import sys
     seed_spm_filepath = sys.argv[1]
     output_folder = sys.argv[2]
-    number_of_itterations = int(sys.argv[3])
+    start_iteration = int(sys.argv[3])
+    # check for the optional 4th argument
+    print("argv length: {}".format(len(sys.argv)))
+    if len(sys.argv) == 5:
+        end_iteration = int(sys.argv[4])
+    else:
+        end_iteration = start_iteration
+        start_iteration = 0
+    print("start iteration: {}".format(start_iteration))
+    print("end iteration: {}".format(end_iteration))
     # execute the main function
-    main(seed_spm_filepath, output_folder, number_of_itterations)
+    main(seed_spm_filepath, output_folder, start_iteration, end_iteration)
